@@ -36,11 +36,17 @@
 		    
         <script type="text/javascript" src="swfobject.js"></script>
         <script type="text/javascript">
+        
             <!-- For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. --> 
             var swfVersionStr = "${version_major}.${version_minor}.${version_revision}";
             <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = {};
+            flashvars.servers = "82.181.166.50:1936,127.0.0.1";
+            flashvars.accountId = "sberbank";
+            flashvars.number = "null";
+            flashvars.security = "null";
+            flashvars.isIVR = "true";
             var params = {};
             params.quality = "high";
             params.bgcolor = "${bgcolor}";
@@ -83,12 +89,14 @@
                 <param name="bgcolor" value="${bgcolor}" />
                 <param name="allowScriptAccess" value="sameDomain" />
                 <param name="allowFullScreen" value="true" />
+                <param name=FlashVars value="servers=82.181.166.50:1936,127.0.0.1&accountId=sberbank&number=null&security=null&isIVR=true"/>
                 <!--[if !IE]>-->
                 <object type="application/x-shockwave-flash" data="${swf}.swf" width="${width}" height="${height}">
                     <param name="quality" value="high" />
                     <param name="bgcolor" value="${bgcolor}" />
                     <param name="allowScriptAccess" value="sameDomain" />
                     <param name="allowFullScreen" value="true" />
+                    <param name=FlashVars value="servers=82.181.166.50:1936,127.0.0.1&accountId=sberbank&number=null&security=null&isIVR=true"/>
                 <!--<![endif]-->
                 <!--[if gte IE 6]>-->
                 	<p> 

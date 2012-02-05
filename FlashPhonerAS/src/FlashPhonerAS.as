@@ -1,5 +1,8 @@
 package
 {
+	import com.greensock.TweenMax;
+	import com.greensock.easing.Expo;
+	
 	import components.CallButton;
 	import components.ChooseMicrophoneText;
 	import components.DurationText;
@@ -17,7 +20,9 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.SampleDataEvent;
 	import flash.events.TimerEvent;
+	import flash.external.ExternalInterface;
 	import flash.media.Microphone;
+	import flash.net.SharedObject;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
@@ -35,18 +40,29 @@ package
 		private static const MSG_BUSY:String 			= "Занято";
 		private static const MSG_COMPLETE:String 		= "Разговор завершен";
 		
-		private var servers:Array = ["82.181.166.50:1936"];
-		private var number:String = null;
+		private var settings:SharedObject = SharedObject.getLocal("phone_settings");
+		
+		private var servers:Array = new Array();
+		private var accountId:String;
+		private var number:String;
+		private var security:String;
+		private var isIVR:Boolean;
 		
 		private var _soundVolume:Number = 75;
-		private var _microphoneGain:Number = 75;
+		private var _microphoneGain:Number = 50;
+		private var _microphoneIndex:int = 0;
 		
 		private var microphone:Microphone;
 		private var micActivityTimer:Timer;
 		private var phone:Phone;
 		
-		
 		private var _holder:Sprite;
+		
+		[Embed(source="assets/fonts/AGAvalancheC-Bold.otf", fontFamily="number_font")]
+		private var font:Class;	
+		
+		[Embed(source="assets/fonts/PT_Sans-Regular.ttf", fontFamily="duration_font")]
+		private var font1:Class;
 		
 		private var _lines1Holder:Sprite;
 		[Embed(source="assets/lines1.png")]
@@ -91,26 +107,93 @@ package
 		
 		private var _chooseMicrophoneText:ChooseMicrophoneText;
 		
+		private var _errorTimer:Timer;
+		
 		public function FlashPhonerAS()
 		{
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
 			
+			if(settings.data.soundVolume)
+			{
+				_soundVolume = Number(settings.data.soundVolume);
+			}
+			
+			if(settings.data.microphoneGain)
+			{
+				_microphoneGain = Number(settings.data.microphoneGain);
+			}
+			
+			if(settings.data.microphoneIndex)
+			{
+				_microphoneIndex = Number(settings.data.microphoneIndex);
+			}
+			
+			
+			
+			if(this.root.loaderInfo.parameters.servers)
+			{
+				servers = String(this.root.loaderInfo.parameters.servers).split(",");
+			}
+			
+			if(this.root.loaderInfo.parameters.accountId)
+			{
+				accountId = this.root.loaderInfo.parameters.accountId;
+			}
+			
+			if(this.root.loaderInfo.parameters.number)
+			{
+				number = this.root.loaderInfo.parameters.number;
+			}
+			
+			if(this.root.loaderInfo.parameters.security)
+			{
+				security = this.root.loaderInfo.parameters.security;
+			}
+			
+			if(this.root.loaderInfo.parameters.isIVR)
+			{
+				if(this.root.loaderInfo.parameters.isIVR == "true")
+				{
+					isIVR = true;
+				}
+				else if(this.root.loaderInfo.parameters.isIVR == "false")
+				{
+					isIVR = false;
+				}
+			}
+			
 			
 			_holder = new Sprite();
 			addChild(_holder);
-		
+			
 			
 			_lines1Holder = new Sprite();
 			_lines1Holder.addChild(new _assetClass1());
-			_lines1Holder.y = 145;
+		
+			if(isIVR)
+			{
+				_lines1Holder.y = 145;
+			}
+			else
+			{
+				_lines1Holder.y = 0;
+			}
 			
 			_holder.addChild(_lines1Holder);
 			
 			
 			_lines2Holder = new Sprite();
 			_lines2Holder.addChild(new _assetClass2());
-			_lines2Holder.y = 450;
+			
+			if(isIVR)
+			{
+				_lines2Holder.y = 450;
+			}
+			else
+			{
+				_lines2Holder.y = 305;
+			}
 			
 			_holder.addChild(_lines2Holder);
 			
@@ -221,8 +304,17 @@ package
 			
 			_semiTransparentBackground = new Sprite();
 			_semiTransparentBackground.graphics.beginFill(0x142136, 1);
-			_semiTransparentBackground.graphics.drawRect(0, 0, 240, 540);
+			_semiTransparentBackground.graphics.drawRect(0, 0, 240, 100);
 			_semiTransparentBackground.graphics.endFill();
+			
+			if(isIVR)
+			{
+				_semiTransparentBackground.height = 540;
+			}
+			else
+			{
+				_semiTransparentBackground.height = 400;
+			}
 			
 			_semiTransparentBackground.alpha = 0.9;
 			_semiTransparentBackground.visible = false;
@@ -232,7 +324,16 @@ package
 			
 			_logoHolder = new Sprite();
 			_logoHolder.addChild(new _assetLogo());
-			_logoHolder.y = 215;
+			
+			if(isIVR)
+			{
+				_logoHolder.y = 215;
+			}
+			else
+			{
+				_logoHolder.y = 70;
+			}
+			
 			_logoHolder.x = 60;
 			
 			_holder.addChild(_logoHolder);
@@ -240,22 +341,47 @@ package
 			
 			_backgroundHolder = new Sprite();
 			_backgroundHolder.addChild(new _assetBackground());
-			_backgroundHolder.y = 300;
+			
+			if(isIVR)
+			{
+				_backgroundHolder.y = 300;
+			}
+			else
+			{
+				_backgroundHolder.y = 155;
+			}
 			
 			_holder.addChild(_backgroundHolder);
 			
 			
 			_settingsBackgroundHolder = new Sprite();
 			_settingsBackgroundHolder.addChild(new _settingsAssetBackground());
-			_settingsBackgroundHolder.y = 240;
-			_settingsBackgroundHolder.visible = false;
 			
+			if(isIVR)
+			{
+				_settingsBackgroundHolder.y = 240;
+			}
+			else
+			{
+				_settingsBackgroundHolder.y = 95;
+			}
+			
+			_settingsBackgroundHolder.visible = false;
 			_holder.addChild(_settingsBackgroundHolder);
 			
 			
 			_copyrightHolder = new Sprite();
 			_copyrightHolder.addChild(new _assetCopyright());
-			_copyrightHolder.y = 507;
+			
+			if(isIVR)
+			{
+				_copyrightHolder.y = 507;
+			}
+			else
+			{
+				_copyrightHolder.y = 362;
+			}
+			
 			_copyrightHolder.x = 63;
 			
 			_holder.addChild(_copyrightHolder);
@@ -263,7 +389,16 @@ package
 			
 			_callButton = new CallButton();
 			_callButton.x = 72;
-			_callButton.y = 265;
+			
+			if(isIVR)
+			{
+				_callButton.y = 265;
+			}
+			else
+			{
+				_callButton.y = 120;
+			}
+			
 			_holder.addChild(_callButton);
 			
 			_callButtonOverSprite = new Sprite();
@@ -281,7 +416,16 @@ package
 			
 			_text = new DurationText();
 			_text.x = 20;
-			_text.y = 372;
+			
+			if(isIVR)
+			{
+				_text.y = 372;
+			}
+			else
+			{
+				_text.y = 227;
+			}
+			
 			_text.setText("Позвонить");
 			_holder.addChild(_text);
 			
@@ -291,7 +435,15 @@ package
 			
 			_settingsButton = new SettingsButton();
 			_settingsButton.x = 102;
-			_settingsButton.y = 469;
+			
+			if(isIVR)
+			{
+				_settingsButton.y = 469;
+			}
+			else
+			{
+				_settingsButton.y = 324;
+			}
 			
 			_holder.addChild(_settingsButton);
 			
@@ -311,14 +463,32 @@ package
 			
 			_soundSlider = new SoundSlider();
 			_soundSlider.x = 19;
-			_soundSlider.y = 400;
+			
+			if(isIVR)
+			{
+				_soundSlider.y = 400;
+			}
+			else
+			{
+				_soundSlider.y = 255;
+			}
+			
 			_soundSlider.setVolume(_soundVolume);
 			_holder.addChild(_soundSlider);
 			
 			
-			_microphoneComponent = new MicrophoneComponent(Microphone.names);
+			_microphoneComponent = new MicrophoneComponent(Microphone.names, _microphoneIndex);
 			_microphoneComponent.x = 19;
-			_microphoneComponent.y = 430;
+			
+			if(isIVR)
+			{
+				_microphoneComponent.y = 430;
+			}
+			else
+			{
+				_microphoneComponent.y = 285;
+			}
+			
 			_microphoneComponent.setGain(_microphoneGain);
 			_holder.addChild(_microphoneComponent);
 			
@@ -333,16 +503,27 @@ package
 			}, 50);
 			
 			
-			setMicrophone(getMicrophone());
-			
+			setMicrophone(getMicrophone(_microphoneIndex));
 			
 			
 			_chooseMicrophoneText = new ChooseMicrophoneText();
 			_chooseMicrophoneText.x = 25;
-			_chooseMicrophoneText.y = 310;
+			
+			if(isIVR)
+			{
+				_chooseMicrophoneText.y = 310;
+			}
+			else
+			{
+				_chooseMicrophoneText.y = 165;
+			}
+			
 			_chooseMicrophoneText.visible = false;
 			_holder.addChild(_chooseMicrophoneText);
 			
+			
+			_errorTimer = new Timer(2000, 1);
+			_errorTimer.addEventListener(TimerEvent.TIMER, handleErrorTimer);
 			
 			this.addEventListener(SoundChangeEvent.SOUND_CHANGE_EVENT, handleSoundChange);
 			this.addEventListener(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, handleMicrophoneVolumeChange);
@@ -399,7 +580,14 @@ package
 				}
 				else
 				{
-					_logoHolder.y = 215;
+					if(isIVR)
+					{
+						_logoHolder.y = 215;
+					}
+					else
+					{
+						_logoHolder.y = 70;
+					}
 				}
 				
 				for(var i:uint = 0; i < _buttonsArray.length; ++i)
@@ -418,17 +606,11 @@ package
 			} 
 			else 
 			{
-				_logoHolder.y = 9;
-				
-				for(var j:uint = 0; j < _buttonsArray.length; ++j)
-				{
-					NumberButton(_buttonsArray[j]).visible = true;
-				}
-				
 				phone = new Phone();
 				phone.setServers(servers);
 				phone.setNumber(number);
-				phone.setAccountId("sberbank");
+				phone.setAccountId(accountId);
+				phone.setSecurity(security);
 				phone.setMicrophone(microphone);
 				phone.addEventListener(PhoneEvent.ANSWERED, onAccepted);
 				phone.addEventListener(PhoneEvent.RINGING,  onRinging);
@@ -442,35 +624,62 @@ package
 				
 				_callButton.goHungUpOver();
 				
-				
-				_text.setText("Вы говорите " + "00:00:00");
-				_timer.start();
+				_text.setText("Соединяем...");
 			}
 		}
 		
 		protected function onAccepted(pe:PhoneEvent):void
 		{	
+			_text.setText("Вы говорите " + "00:00");
+			_timer.start();
 			
+			if(isIVR)
+			{
+				TweenMax.to(_logoHolder, 1, {y:9, ease:Expo.easeOut, onComplete:showButtons});
+			}
+		}
+		
+		private function showButtons():void
+		{
+			for(var j:uint = 0; j < _buttonsArray.length; ++j)
+			{
+				NumberButton(_buttonsArray[j]).visible = true;
+				
+				NumberButton(_buttonsArray[j]).alpha = 0;
+				
+				TweenMax.to(NumberButton(_buttonsArray[j]), 1, {alpha:1, ease:Expo.easeOut});
+			}
 		}
 		
 		protected function onRinging(pe:PhoneEvent):void
 		{
-			
+			_text.setText("");
 		}
 		
 		protected function onBusy(pe:PhoneEvent):void
 		{
 			hangup(MSG_BUSY);
+			
+			disableButtons();
+			_errorTimer.start();
 		}
 		
 		protected function onError(pe:PhoneEvent):void 
 		{
+			_text.setText("Ошибка соединения");
+			
+			disableButtons();
+			_errorTimer.start();
+			
 			hangup(MSG_ERROR);
 		}
 		
 		protected function onHangup(pe:PhoneEvent):void 
 		{
 			hangup(MSG_CALLED_HANGUP);
+			
+			disableButtons();
+			_errorTimer.start();
 		}
 		
 		protected function hangup(msg:String):void
@@ -519,13 +728,19 @@ package
 				_backgroundHolder.visible = false;
 				_settingsBackgroundHolder.visible = true;
 				
-				_callButton.y = 200;
-				
 				_logoHolder.y = 9;
-				
 				_text.visible = false;
 				
-				_soundSlider.y = 375;
+				if(isIVR)
+				{
+					_soundSlider.y = 375;
+					_callButton.y = 200;
+				}
+				else
+				{
+					_soundSlider.y = 230;
+					_callButton.y = 55;
+				}
 				
 				_microphoneComponent.goToSettingsState();
 			}
@@ -540,20 +755,41 @@ package
 				_backgroundHolder.visible = true;
 				_settingsBackgroundHolder.visible = false;
 				
-				_callButton.y = 265;
-				
-				if(phone == null)
+				if(isIVR)
 				{
-					_logoHolder.y = 215;
+					_callButton.y = 265;
+					_soundSlider.y = 400;
 				}
 				else
 				{
-					_logoHolder.y = 9;
+					_callButton.y = 120;
+					_soundSlider.y = 255;
+				}
+				
+				if(phone == null)
+				{
+					if(isIVR)
+					{
+						_logoHolder.y = 215;
+					}
+					else
+					{
+						_logoHolder.y = 70;
+					}
+				}
+				else
+				{
+					if(isIVR)
+					{
+						_logoHolder.y = 9;
+					}
+					else
+					{
+						_logoHolder.y = 70;
+					}
 				}
 				
 				_text.visible = true;
-				
-				_soundSlider.y = 400;
 				
 				_microphoneComponent.goToNormalState();
 			}
@@ -619,6 +855,9 @@ package
 			{
 				phone.setVolume(_soundVolume / 100);
 			}
+			
+			settings.data.soundVolume = _soundVolume;
+			settings.flush();
 		}
 		
 		private function handleMicrophoneVolumeChange(event:MicrophoneVolumeChangeEvent):void
@@ -629,11 +868,19 @@ package
 			{
 				phone.getMicrophone().gain = _microphoneGain;
 			}
+			
+			settings.data.microphoneGain = _microphoneGain;
+			settings.flush();
 		}
 		
 		private function handleMicrophoneChange(event:MicrophoneChangeEvent):void
 		{
-			setMicrophone(getMicrophone(event._index));
+			_microphoneIndex = event._index;
+			
+			setMicrophone(getMicrophone(_microphoneIndex));
+			
+			settings.data.microphoneIndex = _microphoneIndex;
+			settings.flush();
 		}
 		
 		private function handleTimer(event:TimerEvent):void
@@ -641,6 +888,47 @@ package
 			_time++;
 			
 			_text.setText("Вы говорите " + convert(_time));
+		}
+		
+		private function handleErrorTimer(event:TimerEvent):void
+		{
+			_text.setText("Позвонить");
+			
+			if(_semiTransparentBackground.visible == true)
+			{
+				_logoHolder.y = 9;
+			}
+			else
+			{
+				if(isIVR)
+				{
+					_logoHolder.y = 215;
+				}
+				else
+				{
+					_logoHolder.y = 70;
+				}
+			}
+			
+			_callButton.goCall();
+			
+			_callButtonOverSprite.addEventListener(MouseEvent.CLICK, handleCallButtonClick);
+			
+			for(var i:uint = 0; i < _buttonsArray.length; ++i)
+			{
+				NumberButton(_buttonsArray[i]).visible = false;
+				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.CLICK, handleNumberButtonClick);
+			}
+		}
+		
+		private function disableButtons():void
+		{
+			_callButtonOverSprite.removeEventListener(MouseEvent.CLICK, handleCallButtonClick);
+			
+			for(var i:uint = 0; i < _buttonsArray.length; ++i)
+			{
+				NumberButton(_buttonsArray[i]).removeEventListener(MouseEvent.CLICK, handleNumberButtonClick);
+			}
 		}
 		
 		private function convert(tm:Number):String
@@ -651,32 +939,11 @@ package
 			
 			var hh:Number;
 			var mm:Number;
-			var ss:Number =  Math.floor(tm)
+			var ss:Number =  Math.floor(tm);
 			
-			if(ss < 10) 
+			
+			if(ss < 3600)
 			{
-				s_ = "0" + ss;
-			}
-			else
-			{
-				s_ = ss.toString();
-			}
-				
-			if(ss > 59)	
-			{
-				mm = Math.floor(ss/60); 
-				
-				if(mm < 10) 
-				{
-					m_ = "0" + mm;
-				}
-				else
-				{
-					m_ = mm.toString();
-				}
-				
-				ss = (ss % 60);
-				
 				if(ss < 10) 
 				{
 					s_ = "0" + ss;
@@ -685,12 +952,38 @@ package
 				{
 					s_ = ss.toString();
 				}
+				
+				if(ss > 59)	
+				{
+					mm = Math.floor(ss/60); 
+					
+					if(mm < 10) 
+					{
+						m_ = "0" + mm;
+					}
+					else
+					{
+						m_ = mm.toString();
+					}
+					
+					ss = (ss % 60);
+					
+					if(ss < 10) 
+					{
+						s_ = "0" + ss;
+					}
+					else
+					{
+						s_ = ss.toString();
+					}
+				}
+				
+				return  m_ + ":" + s_;
 			}
-			
-			if(ss > 3599)
+			else
 			{
 				hh = Math.floor(ss/3600); 
-				
+					
 				if(hh < 10) 
 				{
 					h_ = "0" + hh;
@@ -701,6 +994,7 @@ package
 				}
 				
 				mm = (ss % 3600);
+				mm = Math.floor(mm / 60);
 				
 				if(mm < 10) 
 				{
@@ -721,10 +1015,9 @@ package
 				{
 					s_ = ss.toString();
 				}
+				
+				return  h_ + ":" + m_ + ":" + s_;
 			}
-			
-			
-			return  h_ + ":" + m_ + ":" + s_;
 		}
 	}
 }

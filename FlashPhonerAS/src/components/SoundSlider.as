@@ -33,6 +33,9 @@ package components
 		
 		private var _thumbOverSprite:Sprite;
 		
+		private var _soundFlag:Boolean = true;
+		private var _thumbPosition:Number;
+		
 		public function SoundSlider()
 		{
 			_holder = new Sprite();
@@ -107,7 +110,25 @@ package components
 		
 		private function handleIconClick(event:MouseEvent):void
 		{
-			
+			if(_soundFlag)
+			{
+				_soundFlag = false;
+				_thumbPosition = _thumbHolder.x;
+				_thumbHolder.x = 28;
+				
+				var _volume1:Number = 100 * (_thumbHolder.x - 28)/154;
+				
+				this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume1));
+			}
+			else
+			{
+				_soundFlag = true;
+				_thumbHolder.x = _thumbPosition;
+				
+				var _volume2:Number = 100 * (_thumbHolder.x - 28)/154;
+				
+				this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume2));
+			}
 		}
 		
 		private function handleIconOver(event:MouseEvent):void
@@ -139,21 +160,25 @@ package components
 			
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
 			
+			_soundFlag = true;
+			
 			this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume));
 		}
 		
 		private function handleThumbDown(event:MouseEvent):void
 		{
 			this.stage.addEventListener(MouseEvent.MOUSE_UP, handleMouseUp);
-			
 			this.stage.addEventListener(MouseEvent.MOUSE_MOVE, handleMouseMove);
 		}
 		
 		private function handleMouseUp(event:MouseEvent):void
 		{
 			this.stage.removeEventListener(MouseEvent.MOUSE_MOVE, handleMouseMove);
+			this.stage.removeEventListener(MouseEvent.MOUSE_UP, handleMouseUp);
 			
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
+			
+			_soundFlag = true;
 			
 			this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume));
 		}

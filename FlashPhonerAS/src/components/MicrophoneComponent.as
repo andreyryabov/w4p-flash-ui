@@ -45,10 +45,13 @@ package components
 		
 		private var _thumbOverSprite:Sprite;
 		
+		private var _microphoneFlag:Boolean = true;
+		private var _thumbPosition:Number;
+		
 		private var _microphoneArray:Array;
 		private var _microphoneChoose:MicrophoneChoose;
 		
-		public function MicrophoneComponent(arr:Array)
+		public function MicrophoneComponent(arr:Array, _ind:int)
 		{
 			_holder = new Sprite();
 			addChild(_holder);
@@ -150,7 +153,7 @@ package components
 			_thumbHolder.addChild(_thumbOverSprite);
 			
 			
-			_microphoneChoose = new MicrophoneChoose(_microphoneArray);
+			_microphoneChoose = new MicrophoneChoose(_microphoneArray, _ind);
 			_microphoneChoose.x = 0;
 			_microphoneChoose.y = -96;
 			_microphoneChoose.visible = false;
@@ -185,7 +188,25 @@ package components
 		
 		private function handleIconClick(event:MouseEvent):void
 		{
-			
+			if(_microphoneFlag)
+			{
+				_microphoneFlag = false;
+				_thumbPosition = _thumbHolder.x;
+				_thumbHolder.x = 28;
+				
+				var _volume1:Number = 100 * (_thumbHolder.x - 28)/154;
+				
+				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume1));
+			}
+			else
+			{
+				_microphoneFlag = true;
+				_thumbHolder.x = _thumbPosition;
+				
+				var _volume2:Number = 100 * (_thumbHolder.x - 28)/154;
+				
+				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume2));
+			}
 		}
 		
 		private function handleIconOver(event:MouseEvent):void
@@ -217,6 +238,8 @@ package components
 		
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
 			
+			_microphoneFlag = true;
+			
 			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume));
 		}
 		
@@ -230,8 +253,11 @@ package components
 		private function handleMouseUp(event:MouseEvent):void
 		{
 			this.stage.removeEventListener(MouseEvent.MOUSE_MOVE, handleMouseMove);
+			this.stage.removeEventListener(MouseEvent.MOUSE_UP, handleMouseUp);
 			
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
+			
+			_microphoneFlag = true;
 			
 			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume));
 		}

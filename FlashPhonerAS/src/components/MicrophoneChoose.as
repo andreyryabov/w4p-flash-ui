@@ -28,11 +28,12 @@ package components
 		private var _dropDownList:Sprite;
 		
 		private var _array:Array = new Array();
-		private var _currentIndex:int = 0;
+		private var _currentIndex:int;
 		
-		public function MicrophoneChoose(arr:Array)
+		public function MicrophoneChoose(arr:Array, _ind:int)
 		{
 			_microphoneArray = arr;
+			_currentIndex = _ind;
 			
 			_holder = new Sprite();
 			addChild(_holder);

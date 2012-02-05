@@ -43,7 +43,7 @@ package components
 			
 			
 			_textFormat = new TextFormat();
-			_textFormat.font = "AGAvalancheC";
+			_textFormat.font = "number_font";
 			
 			if(_num == "*")
 			{
@@ -61,7 +61,7 @@ package components
 			_textField = new TextField();
 			_textField.defaultTextFormat = _textFormat;
 			_textField.width = 40;
-			
+			_textField.embedFonts = true;
 			_textField.selectable = false;
 			_textField.text = _num;
 			_textField.x = 10;
