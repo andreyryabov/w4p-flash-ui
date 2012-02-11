@@ -16,6 +16,8 @@ package components
 		[Embed(source="assets/button_over.png")]
 		private var _buttonOver:Class;
 		
+		private var _buttonClicked:Sprite;
+		
 		private var _textFormat:TextFormat;
 		private var _textField:TextField;
 		
@@ -37,6 +39,14 @@ package components
 			_buttonOverHolder.addChild(new _buttonOver());
 			_buttonOverHolder.visible = false;
 			_holder.addChild(_buttonOverHolder);
+			
+			
+			_buttonClicked = new Sprite();
+			_buttonClicked.graphics.beginFill(0xdedede, 1);
+			_buttonClicked.graphics.drawRoundRect(0, 0, 60, 40, 20, 20);
+			_buttonClicked.graphics.endFill();
+			_buttonClicked.visible = false;
+			_holder.addChild(_buttonClicked);
 			
 			
 			_buttonHolder.visible = true;
@@ -93,6 +103,7 @@ package components
 		public function goButtonOver():void
 		{
 			_buttonHolder.visible = false;
+			_buttonClicked.visible = false;
 			_buttonOverHolder.visible = true;
 		}
 		
@@ -100,6 +111,14 @@ package components
 		{
 			_buttonHolder.visible = true;
 			_buttonOverHolder.visible = false;
+			_buttonClicked.visible = false;
+		}
+		
+		public function goButtonClicked():void
+		{
+			_buttonHolder.visible = false;
+			_buttonOverHolder.visible = false;
+			_buttonClicked.visible = true;
 		}
 		
 		public function getNumber():String

@@ -1,6 +1,7 @@
 package components
 {
 	import flash.display.Sprite;
+	import flash.text.Font;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	
@@ -11,15 +12,24 @@ package components
 		
 		public function ChooseMicrophoneText()
 		{
+			var _arr:Array = Font.enumerateFonts(true);
+			
 			_textFormat = new TextFormat();
-			_textFormat.font = "duration_font";
+			
+			_textFormat.font = "Arial";
+			
+			for(var i:uint = 0; i < _arr.length; ++i)
+			{
+				if(Font(_arr[i]).fontName == "PT Sans")
+				{
+					_textFormat.font = "PT Sans";
+				}
+			}
+
 			_textFormat.size = 15;
 			_textFormat.color = 0xffffff;
-			_textFormat.bold = true;
-			
 			_textField = new TextField();
 			_textField.defaultTextFormat = _textFormat;
-			_textField.embedFonts = true;
 			_textField.width = 200;
 			_textField.height = 25;
 			_textField.text = "Выберите микрофон:";

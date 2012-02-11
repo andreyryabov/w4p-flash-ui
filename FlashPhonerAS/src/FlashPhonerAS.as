@@ -61,9 +61,6 @@ package
 		[Embed(source="assets/fonts/AGAvalancheC-Bold.otf", fontFamily="number_font")]
 		private var font:Class;	
 		
-		[Embed(source="assets/fonts/PT_Sans-Regular.ttf", fontFamily="duration_font")]
-		private var font1:Class;
-		
 		private var _lines1Holder:Sprite;
 		[Embed(source="assets/lines1.png")]
 		private var _assetClass1:Class;
@@ -299,6 +296,8 @@ package
 				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.CLICK, handleNumberButtonClick);
 				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.MOUSE_OVER, handleNumberButtonOver);
 				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.ROLL_OUT, handleNumberButtonOut);
+				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.MOUSE_DOWN, handleNumberButtonDown);
+				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.MOUSE_UP, handleNumberButtonUp);
 			}
 			
 			
@@ -847,6 +846,28 @@ package
 			}
 		}
 		
+		private function handleNumberButtonDown(event:MouseEvent):void
+		{
+			for(var i:uint = 0; i < _buttonsArray.length; ++i)
+			{
+				if(event.currentTarget == NumberButton(_buttonsArray[i]))
+				{
+					NumberButton(_buttonsArray[i]).goButtonClicked();
+				}
+			}
+		}
+		
+		private function handleNumberButtonUp(event:MouseEvent):void
+		{
+			for(var i:uint = 0; i < _buttonsArray.length; ++i)
+			{
+				if(event.currentTarget == NumberButton(_buttonsArray[i]))
+				{
+					NumberButton(_buttonsArray[i]).goButtonOver();
+				}
+			}
+		}
+		
 		private function handleSoundChange(event:SoundChangeEvent):void
 		{
 			_soundVolume = event._vol;
@@ -917,6 +938,7 @@ package
 			for(var i:uint = 0; i < _buttonsArray.length; ++i)
 			{
 				NumberButton(_buttonsArray[i]).visible = false;
+				NumberButton(_buttonsArray[i]).goButtonOut();
 				NumberButton(_buttonsArray[i]).addEventListener(MouseEvent.CLICK, handleNumberButtonClick);
 			}
 		}
@@ -928,6 +950,7 @@ package
 			for(var i:uint = 0; i < _buttonsArray.length; ++i)
 			{
 				NumberButton(_buttonsArray[i]).removeEventListener(MouseEvent.CLICK, handleNumberButtonClick);
+				NumberButton(_buttonsArray[i]).goButtonClicked();
 			}
 		}
 		
