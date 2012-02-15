@@ -17,9 +17,17 @@ package components
 		[Embed(source="assets/device_button_over.png")]
 		private var _backgroundOverAsset:Class;
 		
+		private var _iconClickedBackground:Sprite;
+		[Embed(source="assets/device_button_clicked.png")]
+		private var _backgroundClickedAsset:Class;
+		
 		private var _iconHolder:Sprite;
 		[Embed(source="assets/microphone_icon.png")]
 		private var _icon:Class;
+		
+		private var _disabledHolder:Sprite;
+		[Embed(source="assets/microphone_disabled.png")]
+		private var _disabledAsset:Class;
 		
 		private var _iconOverSprite:Sprite;
 		
@@ -46,7 +54,7 @@ package components
 		private var _thumbOverSprite:Sprite;
 		
 		private var _microphoneFlag:Boolean = true;
-		private var _thumbPosition:Number;
+		private var _thumbPosition:Number = 28 + 50 * 154/100;
 		
 		private var _microphoneArray:Array;
 		private var _microphoneChoose:MicrophoneChoose;
@@ -71,11 +79,23 @@ package components
 			_holder.addChild(_iconOverBackground);
 			
 			
+			_iconClickedBackground = new Sprite();
+			_iconClickedBackground.addChild(new _backgroundClickedAsset());
+			_iconClickedBackground.visible = false;
+			_holder.addChild(_iconClickedBackground);
+			
+			
 			_iconHolder = new Sprite();
 			_iconHolder.addChild(new _icon());
 			_iconHolder.x = 4;
 			_iconHolder.y = 4;
 			_holder.addChild(_iconHolder);
+			
+			
+			_disabledHolder = new Sprite();
+			_disabledHolder.addChild(new _disabledAsset());
+			_disabledHolder.visible = false;
+			_holder.addChild(_disabledHolder);
 			
 			
 			_iconOverSprite = new Sprite();
@@ -87,6 +107,8 @@ package components
 			_iconOverSprite.addEventListener(MouseEvent.CLICK, handleIconClick);
 			_iconOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleIconOver);
 			_iconOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleIconOut);
+			_iconOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleIconDown);
+			_iconOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleIconUp);
 			_holder.addChild(_iconOverSprite);
 			
 			_iconBackground.visible = true;
@@ -165,6 +187,12 @@ package components
 			_thumbHolder.x = 28 + _num * 154/100;
 		}
 		
+		public function setDisableState():void
+		{
+			_microphoneFlag = false;
+			_disabledHolder.visible = true;
+		}
+		
 		public function setIndicator(_value:Number):void
 		{
 			_indicatorMask.width = 176 * _value / 100;
@@ -191,34 +219,54 @@ package components
 			if(_microphoneFlag)
 			{
 				_microphoneFlag = false;
+				_disabledHolder.visible = true;
+				
 				_thumbPosition = _thumbHolder.x;
 				_thumbHolder.x = 28;
 				
 				var _volume1:Number = 100 * (_thumbHolder.x - 28)/154;
 				
-				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume1));
+				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume1, true));
 			}
 			else
 			{
 				_microphoneFlag = true;
+				_disabledHolder.visible = false;
+				
 				_thumbHolder.x = _thumbPosition;
 				
 				var _volume2:Number = 100 * (_thumbHolder.x - 28)/154;
 				
-				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume2));
+				this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume2, false));
 			}
 		}
 		
 		private function handleIconOver(event:MouseEvent):void
 		{
+			_iconClickedBackground.visible = false;
 			_iconBackground.visible = false;
 			_iconOverBackground.visible = true;
 		}
 		
 		private function handleIconOut(event:MouseEvent):void
 		{
+			_iconClickedBackground.visible = false;
 			_iconBackground.visible = true;
 			_iconOverBackground.visible = false;
+		}
+		
+		private function handleIconDown(event:MouseEvent):void
+		{
+			_iconClickedBackground.visible = true;
+			_iconBackground.visible = false;
+			_iconOverBackground.visible = false;
+		}
+		
+		private function handleIconUp(event:MouseEvent):void
+		{
+			_iconClickedBackground.visible = false;
+			_iconBackground.visible = false;
+			_iconOverBackground.visible = true;
 		}
 		
 		private function handleTrackClick(event:MouseEvent):void
@@ -239,8 +287,9 @@ package components
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
 			
 			_microphoneFlag = true;
+			_disabledHolder.visible = false;
 			
-			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume));
+			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume, false));
 		}
 		
 		private function handleThumbDown(event:MouseEvent):void
@@ -258,8 +307,9 @@ package components
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
 			
 			_microphoneFlag = true;
+			_disabledHolder.visible = false;
 			
-			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume));
+			this.dispatchEvent(new MicrophoneVolumeChangeEvent(MicrophoneVolumeChangeEvent.MICROPHONE_VOLUME_CHANGE_EVENT, true, false, _volume, false));
 		}
 		
 		private function handleMouseMove(event:MouseEvent):void

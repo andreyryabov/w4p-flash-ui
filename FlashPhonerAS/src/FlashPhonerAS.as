@@ -22,6 +22,7 @@ package
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
 	import flash.media.Microphone;
+	import flash.media.Sound;
 	import flash.net.SharedObject;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
@@ -49,7 +50,9 @@ package
 		private var isIVR:Boolean;
 		
 		private var _soundVolume:Number = 75;
+		private var _isSoundDisabled:Boolean = false;
 		private var _microphoneGain:Number = 50;
+		private var _isMicrophoneDisabled:Boolean = false;
 		private var _microphoneIndex:int = 0;
 		
 		private var microphone:Microphone;
@@ -85,6 +88,14 @@ package
 		[Embed(source="assets/settings_background.png")]
 		private var _settingsAssetBackground:Class;
 		
+		[Embed(source="assets/sounds/picking_up_phone.mp3")]
+        private var pickingUpClass:Class;
+        private var pickingUp:Sound = new pickingUpClass() as Sound;
+      
+        [Embed(source="assets/sounds/hanging_up_phone.mp3")]
+        private var hangingUpClass:Class;
+        private var hangingUp:Sound = new hangingUpClass() as Sound;
+		
 		private var _callButton:CallButton;
 		private var _callButtonOverSprite:Sprite;
 		
@@ -111,17 +122,27 @@ package
 			this.stage.scaleMode = StageScaleMode.NO_SCALE;
 			this.stage.align = StageAlign.TOP_LEFT;
 			
-			if(settings.data.soundVolume)
+			if(settings.data.soundVolume != null)
 			{
 				_soundVolume = Number(settings.data.soundVolume);
 			}
 			
-			if(settings.data.microphoneGain)
+			if(settings.data.isSoundDisabled != null)
+			{
+				_isSoundDisabled = Boolean(settings.data.isSoundDisabled);
+			}
+			
+			if(settings.data.microphoneGain != null)
 			{
 				_microphoneGain = Number(settings.data.microphoneGain);
 			}
 			
-			if(settings.data.microphoneIndex)
+			if(settings.data.isMicrophoneDisabled != null)
+			{
+				_isMicrophoneDisabled = Boolean(settings.data.isMicrophoneDisabled);
+			}
+			
+			if(settings.data.microphoneIndex != null)
 			{
 				_microphoneIndex = Number(settings.data.microphoneIndex);
 			}
@@ -410,6 +431,8 @@ package
 			_callButtonOverSprite.addEventListener(MouseEvent.CLICK, handleCallButtonClick);
 			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleCallButtonOver);
 			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleCallButtonOut);
+			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleCallButtonDown);
+			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleCallButtonUp);
 			_callButton.addChild(_callButtonOverSprite);
 			
 			
@@ -456,6 +479,9 @@ package
 			_settingsButtonOverSprite.addEventListener(MouseEvent.CLICK, handleSettingsButtonClick);
 			_settingsButtonOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleSettingsButtonOver);
 			_settingsButtonOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleSettingsButtonOut);
+			_settingsButtonOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleSettingsButtonDown);
+			_settingsButtonOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleSettingsButtonUp);
+			
 			_settingsButton.addChild(_settingsButtonOverSprite);
 			
 			
@@ -475,6 +501,11 @@ package
 			_soundSlider.setVolume(_soundVolume);
 			_holder.addChild(_soundSlider);
 			
+			if(_isSoundDisabled)
+			{
+				_soundSlider.setDisableState();
+			}
+			
 			
 			_microphoneComponent = new MicrophoneComponent(Microphone.names, _microphoneIndex);
 			_microphoneComponent.x = 19;
@@ -490,6 +521,11 @@ package
 			
 			_microphoneComponent.setGain(_microphoneGain);
 			_holder.addChild(_microphoneComponent);
+			
+			if(_isMicrophoneDisabled)
+			{
+				_microphoneComponent.setDisableState();
+			}
 			
 			
 			micActivityTimer = Utils.interval(function():void
@@ -596,7 +632,7 @@ package
 				
 				hangup(MSG_COMPLETE);
 				
-				_callButton.goCallOver();	
+//				_callButton.goCallOver();
 				
 				
 				_text.setText("Позвонить");
@@ -622,6 +658,8 @@ package
 				phone.getMicrophone().gain = _microphoneGain;
 				
 				_callButton.goHungUpOver();
+				
+				pickingUp.play();
 				
 				_text.setText("Соединяем...");
 			}
@@ -687,6 +725,8 @@ package
 			{
 				phone.close();
 				phone = null;
+				
+				hangingUp.play();
 			} 
 		}
 		
@@ -703,6 +743,30 @@ package
 		}
 		
 		private function handleCallButtonOut(event:MouseEvent):void
+		{
+			if(phone == null)
+			{
+				_callButton.goCall();
+			}
+			else
+			{
+				_callButton.goHungUp();
+			}
+		}
+		
+		private function handleCallButtonDown(event:MouseEvent):void
+		{
+			if(phone == null)
+			{
+				_callButton.goCallClicked();
+			}
+			else
+			{
+				_callButton.goHungUpClicked();
+			}
+		}
+		
+		private function handleCallButtonUp(event:MouseEvent):void
 		{
 			if(phone == null)
 			{
@@ -810,6 +874,22 @@ package
 			}
 		}
 		
+		private function handleSettingsButtonDown(event:MouseEvent):void
+		{
+			if(_semiTransparentBackground.visible == true)
+			{
+				_settingsButton.goOkClicked();
+			}
+		}
+		
+		private function handleSettingsButtonUp(event:MouseEvent):void
+		{
+			if(_semiTransparentBackground.visible == true)
+			{
+				_settingsButton.goOkOver();
+			}
+		}
+		
 		private function handleNumberButtonClick(event:MouseEvent):void
 		{
 			for(var i:uint = 0; i < _buttonsArray.length; ++i)
@@ -878,6 +958,7 @@ package
 			}
 			
 			settings.data.soundVolume = _soundVolume;
+			settings.data.isSoundDisabled = event._isInitiatorButton;
 			settings.flush();
 		}
 		
@@ -891,6 +972,7 @@ package
 			}
 			
 			settings.data.microphoneGain = _microphoneGain;
+			settings.data.isMicrophoneDisabled = event._isInitiatorButton;
 			settings.flush();
 		}
 		
@@ -946,6 +1028,7 @@ package
 		private function disableButtons():void
 		{
 			_callButtonOverSprite.removeEventListener(MouseEvent.CLICK, handleCallButtonClick);
+			_callButton.goCallClicked();
 			
 			for(var i:uint = 0; i < _buttonsArray.length; ++i)
 			{

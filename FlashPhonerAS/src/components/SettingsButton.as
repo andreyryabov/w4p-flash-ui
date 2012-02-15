@@ -18,6 +18,10 @@ package components
 		[Embed(source="assets/ok_button_over.png")]
 		private var _okOverState:Class;
 		
+		private var _okClickedStateHolder:Sprite;
+		[Embed(source="assets/ok_button_clicked.png")]
+		private var _okClickedState:Class;
+		
 		public function SettingsButton()
 		{
 			_holder = new Sprite();
@@ -38,6 +42,11 @@ package components
 			_okOverStateHolder.visible = false;
 			_holder.addChild(_okOverStateHolder);
 			
+			_okClickedStateHolder = new Sprite();
+			_okClickedStateHolder.addChild(new _okClickedState());
+			_okClickedStateHolder.visible = false;
+			_holder.addChild(_okClickedStateHolder);
+			
 			_settingsStateHolder.visible = true;
 		}
 		
@@ -46,6 +55,7 @@ package components
 			_settingsStateHolder.visible = true;
 			_okStateHolder.visible = false;
 			_okOverStateHolder.visible = false;
+			_okClickedStateHolder.visible = false;
 		}
 		
 		public function goOk():void
@@ -53,6 +63,7 @@ package components
 			_settingsStateHolder.visible = false;
 			_okStateHolder.visible = true;
 			_okOverStateHolder.visible = false;
+			_okClickedStateHolder.visible = false;
 		}
 		
 		public function goOkOver():void
@@ -60,6 +71,15 @@ package components
 			_settingsStateHolder.visible = false;
 			_okStateHolder.visible = false;
 			_okOverStateHolder.visible = true;
+			_okClickedStateHolder.visible = false;
+		}
+		
+		public function goOkClicked():void
+		{
+			_settingsStateHolder.visible = false;
+			_okStateHolder.visible = false;
+			_okOverStateHolder.visible = false;
+			_okClickedStateHolder.visible = true;
 		}
 	}
 }
