@@ -431,8 +431,8 @@ package
 			_callButtonOverSprite.addEventListener(MouseEvent.CLICK, handleCallButtonClick);
 			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleCallButtonOver);
 			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleCallButtonOut);
-			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleCallButtonDown);
-			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleCallButtonUp);
+//			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleCallButtonDown);
+//			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleCallButtonUp);
 			_callButton.addChild(_callButtonOverSprite);
 			
 			
@@ -633,6 +633,8 @@ package
 				hangup(MSG_COMPLETE);
 				
 //				_callButton.goCallOver();
+				
+				_callButtonOverSprite.removeEventListener(MouseEvent.MOUSE_OUT, handleCallButtonOut);
 				
 				
 				_text.setText("Позвонить");
@@ -1016,6 +1018,7 @@ package
 			_callButton.goCall();
 			
 			_callButtonOverSprite.addEventListener(MouseEvent.CLICK, handleCallButtonClick);
+			_callButtonOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleCallButtonOut);
 			
 			for(var i:uint = 0; i < _buttonsArray.length; ++i)
 			{

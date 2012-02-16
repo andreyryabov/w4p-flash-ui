@@ -32,12 +32,29 @@ package components
 		private var _iconOverSprite:Sprite;
 		
 		private var _trackBackground:Sprite;
+		private var _trackMask:Sprite;
+		
+		private var _trackNormal:Sprite;
 		[Embed(source="assets/device_track.png")]
-		private var _trackAsset:Class;
+		private var _trackNormalAsset:Class;
+		
+		private var _trackHighlighted:Sprite;
+		[Embed(source="assets/device_track_highlighted.png")]
+		private var _trackHighlightedAsset:Class;
 		
 		private var _thumbHolder:Sprite;
+		
+		private var _thumbNormalHolder:Sprite;
 		[Embed(source="assets/device_track_thumb.png")]
-		private var _thumbAsset:Class;
+		private var _thumbNormalAsset:Class;
+		
+		private var _thumbOverHolder:Sprite;
+		[Embed(source="assets/device_track_thumb_over.png")]
+		private var _thumbOverAsset:Class;
+		
+		private var _thumbClickedHolder:Sprite;
+		[Embed(source="assets/device_track_thumb_clicked.png")]
+		private var _thumbClickedAsset:Class;
 		
 		private var _thumbOverSprite:Sprite;
 		
@@ -96,23 +113,58 @@ package components
 			
 			_iconBackground.visible = true;
 			
-			
 			_trackBackground = new Sprite();
-			_trackBackground.addChild(new _trackAsset());
-			_holder.addChild(_trackBackground);
-			
 			_trackBackground.x = 28;
 			_trackBackground.y = 5;
 			_trackBackground.addEventListener(MouseEvent.CLICK, handleTrackClick);
+			_holder.addChild(_trackBackground);
+			
+			_trackNormal = new Sprite();
+			_trackNormal.addChild(new _trackNormalAsset());
+			_trackBackground.addChild(_trackNormal);
+			
+			_trackMask = new Sprite();
+			_trackMask.graphics.beginFill(0xff0000, 1);
+			_trackMask.graphics.drawRect(0, 0, 100, 13);
+			_trackMask.graphics.endFill();
+			
+			_trackMask.width = _thumbPosition - 28;
+			
+			_trackBackground.addChild(_trackMask);
+			
+			_trackHighlighted = new Sprite();
+			_trackHighlighted.addChild(new _trackHighlightedAsset());
+			_trackBackground.addChild(_trackHighlighted);
+			_trackHighlighted.mask = _trackMask;
 			
 			
 			_thumbHolder = new Sprite();
-			_thumbHolder.addChild(new _thumbAsset());
-			_holder.addChild(_thumbHolder);
 			
 			_thumbHolder.x = 28;
 			_thumbHolder.y = 3;
 			
+			_holder.addChild(_thumbHolder);
+			
+			
+			_thumbNormalHolder = new Sprite();
+			_thumbNormalHolder.addChild(new _thumbNormalAsset());
+			_thumbNormalHolder.visible = false;
+			_thumbHolder.addChild(_thumbNormalHolder);
+			
+			
+			_thumbOverHolder = new Sprite();
+			_thumbOverHolder.addChild(new _thumbOverAsset());
+			_thumbOverHolder.visible = false;
+			_thumbHolder.addChild(_thumbOverHolder);
+			
+			
+			_thumbClickedHolder = new Sprite();
+			_thumbClickedHolder.addChild(new _thumbClickedAsset());
+			_thumbClickedHolder.visible = false;
+			_thumbHolder.addChild(_thumbClickedHolder);
+			
+			
+			_thumbNormalHolder.visible = true;
 			
 			_thumbOverSprite = new Sprite();
 			_thumbOverSprite.graphics.beginFill(0xff0000, 0);
@@ -121,13 +173,18 @@ package components
 			_thumbOverSprite.buttonMode = true;
 			_thumbOverSprite.x = 10;
 			_thumbOverSprite.y = 10;
+			_thumbOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleThumbOver);
+			_thumbOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleThumbOut);
 			_thumbOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleThumbDown);
+			_thumbOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleThumbUp);
 			_thumbHolder.addChild(_thumbOverSprite);
 		}
 		
 		public function setVolume(_num:Number):void
 		{
 			_thumbHolder.x = 28 + _num * 154/100;
+			
+			_trackMask.width = _thumbHolder.x - 28;
 		}
 		
 		public function setDisableState():void
@@ -146,6 +203,8 @@ package components
 				_thumbPosition = _thumbHolder.x;
 				_thumbHolder.x = 28;
 				
+				_trackMask.width = _thumbHolder.x - 28;
+				
 				var _volume1:Number = 100 * (_thumbHolder.x - 28)/154;
 				
 				this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume1, true));
@@ -156,6 +215,8 @@ package components
 				_disabledHolder.visible = false;
 				
 				_thumbHolder.x = _thumbPosition;
+				
+				_trackMask.width = _thumbHolder.x - 28;
 				
 				var _volume2:Number = 100 * (_thumbHolder.x - 28)/154;
 				
@@ -206,6 +267,8 @@ package components
 				_thumbHolder.x = 28 - 10 +  _trackBackground.mouseX;
 			}
 			
+			_trackMask.width = _thumbHolder.x - 28;
+			
 			var _volume:Number = 100 * (_thumbHolder.x - 28)/154; 
 			
 			_soundFlag = true;
@@ -214,10 +277,35 @@ package components
 			this.dispatchEvent(new SoundChangeEvent(SoundChangeEvent.SOUND_CHANGE_EVENT, true, false, _volume, false));
 		}
 		
+		private function handleThumbOver(event:MouseEvent):void
+		{
+			_thumbNormalHolder.visible = false;
+			_thumbOverHolder.visible = true;
+			_thumbClickedHolder.visible = false;
+		}
+		
+		private function handleThumbOut(event:MouseEvent):void
+		{
+			_thumbNormalHolder.visible = true;
+			_thumbOverHolder.visible = false;
+			_thumbClickedHolder.visible = false;
+		}
+		
 		private function handleThumbDown(event:MouseEvent):void
 		{
 			this.stage.addEventListener(MouseEvent.MOUSE_UP, handleMouseUp);
 			this.stage.addEventListener(MouseEvent.MOUSE_MOVE, handleMouseMove);
+			
+			_thumbNormalHolder.visible = false;
+			_thumbOverHolder.visible = false;
+			_thumbClickedHolder.visible = true;
+		}
+		
+		private function handleThumbUp(event:MouseEvent):void
+		{
+			_thumbNormalHolder.visible = false;
+			_thumbOverHolder.visible = true;
+			_thumbClickedHolder.visible = false;
 		}
 		
 		private function handleMouseUp(event:MouseEvent):void
@@ -247,6 +335,8 @@ package components
 			{
 				_thumbHolder.x = 28 - 10 +  _trackBackground.mouseX;
 			}
+			
+			_trackMask.width = _thumbHolder.x - 28;
 		}
 	}
 }
