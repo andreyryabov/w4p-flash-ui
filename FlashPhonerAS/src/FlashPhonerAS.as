@@ -24,6 +24,8 @@ package
 	import flash.media.Microphone;
 	import flash.media.Sound;
 	import flash.net.SharedObject;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
@@ -116,6 +118,8 @@ package
 		private var _chooseMicrophoneText:ChooseMicrophoneText;
 		
 		private var _errorTimer:Timer;
+		
+		private var _linkButton:Sprite;
 		
 		public function FlashPhonerAS()
 		{
@@ -405,6 +409,19 @@ package
 			_copyrightHolder.x = 63;
 			
 			_holder.addChild(_copyrightHolder);
+			
+			_linkButton = new Sprite();
+			_linkButton.graphics.beginFill(0xff0000, 0);
+			_linkButton.graphics.drawRect(0, 0, 107, 12);
+			_linkButton.graphics.endFill();
+			
+			_linkButton.buttonMode = true;
+			_linkButton.x = 3;
+			_linkButton.y = 19;
+			
+			_linkButton.addEventListener(MouseEvent.CLICK, handleLinkClick);
+			
+			_copyrightHolder.addChild(_linkButton);
 			
 			
 			_callButton = new CallButton();
@@ -1038,6 +1055,11 @@ package
 				NumberButton(_buttonsArray[i]).removeEventListener(MouseEvent.CLICK, handleNumberButtonClick);
 				NumberButton(_buttonsArray[i]).goButtonClicked();
 			}
+		}
+		
+		private function handleLinkClick(event:MouseEvent):void
+		{
+			flash.net.navigateToURL(new URLRequest("http://www.webfreephone.ru"));
 		}
 		
 		private function convert(tm:Number):String
