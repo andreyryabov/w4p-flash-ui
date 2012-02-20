@@ -105,6 +105,9 @@ package components
 			_buttonHolder.visible = false;
 			_buttonClickedHolder.visible = false;
 			_buttonOverHolder.visible = true;
+			
+			_holder.x = 0;
+			_holder.y = -1;
 		}
 		
 		public function goButtonOut():void
@@ -112,6 +115,9 @@ package components
 			_buttonHolder.visible = true;
 			_buttonOverHolder.visible = false;
 			_buttonClickedHolder.visible = false;
+			
+			_holder.x = 0;
+			_holder.y = 0;
 		}
 		
 		public function goButtonClicked():void
@@ -119,6 +125,9 @@ package components
 			_buttonHolder.visible = false;
 			_buttonOverHolder.visible = false;
 			_buttonClickedHolder.visible = true;
+			
+			_holder.x = 1;
+			_holder.y = 1;
 		}
 		
 		public function getNumber():String
