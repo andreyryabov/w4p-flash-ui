@@ -107,7 +107,7 @@ package components
 			_buttonOverHolder.visible = true;
 			
 			_holder.x = 0;
-			_holder.y = -1;
+			_holder.y = 0;
 		}
 		
 		public function goButtonOut():void

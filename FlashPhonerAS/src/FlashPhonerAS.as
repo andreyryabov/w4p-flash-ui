@@ -83,16 +83,6 @@ package
 		[Embed(source="assets/settings_text.png")]
 		private var _assetSettingsText:Class;
 		
-		private var _settingsTextOverHolder:Sprite;
-		[Embed(source="assets/settings_text_over.png")]
-		private var _assetSettingsOverText:Class;
-		
-		private var _settingsTextClickedHolder:Sprite;
-		[Embed(source="assets/settings_text_clicked.png")]
-		private var _assetSettingsClickedText:Class;
-		
-		private var _settingsTextOverSprite:Sprite;
-		
 		private var _copyrightHolder:Sprite;
 		[Embed(source="assets/settings_copyright.png")]
 		private var _assetCopyright:Class;
@@ -135,6 +125,8 @@ package
 		private var _errorTimer:Timer;
 		
 		private var _linkButton:Sprite;
+		
+		private var _settingsFlag:Boolean = false;
 		
 		public function FlashPhonerAS()
 		{
@@ -432,7 +424,7 @@ package
 			
 			_linkButton.buttonMode = true;
 			_linkButton.x = 3;
-			_linkButton.y = 19;
+			_linkButton.y = 0;
 			
 			_linkButton.addEventListener(MouseEvent.CLICK, handleLinkClick);
 			
@@ -443,49 +435,18 @@ package
 			_settingsTextHolder = new Sprite();
 			_settingsTextHolder.addChild(new _assetSettingsText());
 			
-			_settingsTextOverHolder = new Sprite();
-			_settingsTextOverHolder.addChild(new _assetSettingsOverText());
-			
-			_settingsTextClickedHolder = new Sprite();
-			_settingsTextClickedHolder.addChild(new _assetSettingsClickedText());
-			
-			_settingsTextOverSprite = new Sprite();
-			_settingsTextOverSprite.graphics.beginFill(0xff0000, 0);
-			_settingsTextOverSprite.graphics.drawRect(0, 0, 64, 19);
-			_settingsTextOverSprite.graphics.endFill();
-			
-			_settingsTextOverSprite.addEventListener(MouseEvent.MOUSE_OVER, handleSettingsTextOver);
-			_settingsTextOverSprite.addEventListener(MouseEvent.MOUSE_OUT, handleSettingsTextOut);
-			_settingsTextOverSprite.addEventListener(MouseEvent.MOUSE_DOWN, handleSettingsTextDown);
-			_settingsTextOverSprite.addEventListener(MouseEvent.MOUSE_UP, handleSettingsTextUp);
-			
 			if(isIVR)
 			{
 				_settingsTextHolder.y = 507;
-				_settingsTextOverHolder.y = 507;
-				_settingsTextClickedHolder.y = 507;
-				_settingsTextOverSprite.y = 507;
 			}
 			else
 			{
 				_settingsTextHolder.y = 362;
-				_settingsTextOverHolder.y = 362;
-				_settingsTextClickedHolder.y = 362;
-				_settingsTextOverSprite.y = 362;
 			}
 			
 			_settingsTextHolder.x = 88;
-			_settingsTextOverHolder.x = 88;
-			_settingsTextClickedHolder.x = 88;
-			_settingsTextOverSprite.x = 88;
 			
 			_holder.addChild(_settingsTextHolder);
-			_holder.addChild(_settingsTextOverHolder);
-			_holder.addChild(_settingsTextClickedHolder);
-			_holder.addChild(_settingsTextOverSprite);
-			
-			_settingsTextOverHolder.visible = false;
-			_settingsTextClickedHolder.visible = false;
 			
 			
 			_callButton = new CallButton();
@@ -690,9 +651,11 @@ package
 		{
 			if (phone != null)
 			{    
-				if(_semiTransparentBackground.visible == true)
+				if(_settingsFlag)
 				{
 					_logoHolder.y = 9;
+					
+					_semiTransparentBackground.visible = false;
 				}
 				else
 				{
@@ -745,6 +708,11 @@ package
 				pickingUp.play();
 				
 				_text.setText("Соединяем...");
+				
+				if(_settingsFlag)
+				{
+					_semiTransparentBackground.visible = true;
+				}
 			}
 		}
 		
@@ -788,10 +756,10 @@ package
 		{
 			_text.setText("Ошибка соединения");
 			
+			hangup(MSG_ERROR);
+			
 			disableButtons();
 			_errorTimer.start();
-			
-			hangup(MSG_ERROR);
 		}
 		
 		protected function onHangup(pe:PhoneEvent):void 
@@ -863,36 +831,42 @@ package
 		
 		private function handleSettingsButtonClick(event:MouseEvent):void
 		{
-			if(_semiTransparentBackground.visible == false)
+			if(!_settingsFlag)
 			{
-				_semiTransparentBackground.visible = true;
+				if(phone)
+				{
+					_semiTransparentBackground.visible = true;
+				}
 				
-				_chooseMicrophoneText.visible = true;
+				_settingsFlag = true;
 				
 				_settingsButton.goOkOver();
 				
 				_backgroundHolder.visible = false;
 				_settingsBackgroundHolder.visible = true;
 				
-				TweenMax.to(_logoHolder, 0.5, {y:9, ease:Expo.easeOut});
+				TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
 				_text.visible = false;
+				
+				_soundSlider.visible = false;
 				
 				if(isIVR)
 				{
-					TweenMax.to(_soundSlider, 0.5, {y:375, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.5, {y:200, ease:Expo.easeOut});
+					TweenMax.to(_soundSlider, 0.7, {y:375, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:200, ease:Expo.easeOut});
 				}
 				else
 				{
-					TweenMax.to(_soundSlider, 0.5, {y:230, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.5, {y:55, ease:Expo.easeOut});
+					TweenMax.to(_soundSlider, 0.7, {y:230, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:55, ease:Expo.easeOut});
 				}
 				
-				_microphoneComponent.goToSettingsState();
+				_microphoneComponent.visible = false;
 			}
 			else
 			{
 				_semiTransparentBackground.visible = false;
+				_settingsFlag = false;
 				
 				_chooseMicrophoneText.visible = false;
 				
@@ -901,49 +875,77 @@ package
 				_backgroundHolder.visible = true;
 				_settingsBackgroundHolder.visible = false;
 				
+				_soundSlider.visible = false;
+				
 				if(isIVR)
 				{
-					TweenMax.to(_soundSlider, 0.5, {y:400, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.5, {y:265, ease:Expo.easeOut});
+					TweenMax.to(_soundSlider, 0.7, {y:400, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:265, ease:Expo.easeOut});
 				}
 				else
 				{
-					TweenMax.to(_soundSlider, 0.5, {y:255, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.5, {y:120, ease:Expo.easeOut});
+					TweenMax.to(_soundSlider, 0.7, {y:255, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:120, ease:Expo.easeOut});
 				}
 				
 				if(phone == null)
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.5, {y:215, ease:Expo.easeOut});
+						TweenMax.to(_logoHolder, 0.7, {y:215, ease:Expo.easeOut, onComplete:showControls2});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.5, {y:70, ease:Expo.easeOut});
+						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut, onComplete:showControls2});
 					}
 				}
 				else
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.5, {y:9, ease:Expo.easeOut});
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls2});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.5, {y:70, ease:Expo.easeOut});
+						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut, onComplete:showControls2});
 					}
 				}
 				
-				_text.visible = true;
-				
-				_microphoneComponent.goToNormalState();
+				_microphoneComponent.visible = false;
 			}
+		}
+		
+		private function showControls1():void
+		{
+			_chooseMicrophoneText.visible = true;
+			
+			_soundSlider.visible = true;
+			_soundSlider.alpha = 0;
+			TweenMax.to(_soundSlider, 1, {alpha:1, ease:Expo.easeOut});
+			
+			_microphoneComponent.visible = true;
+			_microphoneComponent.alpha = 0;
+			_microphoneComponent.goToSettingsState();
+			TweenMax.to(_microphoneComponent, 1, {alpha:1, ease:Expo.easeOut});
+		}
+		
+		private function showControls2():void
+		{
+			_text.visible = true;
+			
+			_soundSlider.visible = true;
+			_soundSlider.alpha = 0;
+			TweenMax.to(_soundSlider, 1, {alpha:1, ease:Expo.easeOut});
+			
+			_microphoneComponent.visible = true;
+			_microphoneComponent.alpha = 0;
+			_microphoneComponent.goToNormalState();
+			TweenMax.to(_microphoneComponent, 1, {alpha:1, ease:Expo.easeOut});
 		}
 		
 		private function handleSettingsButtonOver(event:MouseEvent):void
 		{
-			if(_semiTransparentBackground.visible == true)
+			if(_settingsFlag)
 			{
 				_settingsButton.goOkOver();
 			}
@@ -956,18 +958,18 @@ package
 			if(isIVR)
 			{
 				_settingsButton.x = 102;
-				_settingsButton.y = 468;
+				_settingsButton.y = 469;
 			}
 			else
 			{
 				_settingsButton.x = 102;
-				_settingsButton.y = 323;
+				_settingsButton.y = 324;
 			}
 		}
 		
 		private function handleSettingsButtonOut(event:MouseEvent):void
 		{
-			if(_semiTransparentBackground.visible == true)
+			if(_settingsFlag)
 			{
 				_settingsButton.goOk();
 			}
@@ -991,7 +993,7 @@ package
 		
 		private function handleSettingsButtonDown(event:MouseEvent):void
 		{
-			if(_semiTransparentBackground.visible == true)
+			if(_settingsFlag)
 			{
 				_settingsButton.goOkClicked();
 			}
@@ -1015,7 +1017,7 @@ package
 		
 		private function handleSettingsButtonUp(event:MouseEvent):void
 		{
-			if(_semiTransparentBackground.visible == true)
+			if(_settingsFlag)
 			{
 				_settingsButton.goOkOver();
 			}
@@ -1027,12 +1029,12 @@ package
 			if(isIVR)
 			{
 				_settingsButton.x = 102;
-				_settingsButton.y = 468;
+				_settingsButton.y = 469;
 			}
 			else
 			{
 				_settingsButton.x = 102;
-				_settingsButton.y = 323;
+				_settingsButton.y = 324;
 			}
 		}
 		
@@ -1141,11 +1143,11 @@ package
 		
 		private function handleErrorTimer(event:TimerEvent):void
 		{
-			_text.setText("Позвонить");
-			
-			if(_semiTransparentBackground.visible == true)
+			if(_settingsFlag)
 			{
 				_logoHolder.y = 9;
+				
+				_semiTransparentBackground.visible = false;
 			}
 			else
 			{
@@ -1174,6 +1176,10 @@ package
 		
 		private function disableButtons():void
 		{
+			_text.setText("Позвонить");
+			_timer.stop();
+			_time = 0;
+			
 			_callButtonOverSprite.removeEventListener(MouseEvent.CLICK, handleCallButtonClick);
 			_callButton.goCallClicked();
 			
@@ -1187,34 +1193,6 @@ package
 		private function handleLinkClick(event:MouseEvent):void
 		{
 			flash.net.navigateToURL(new URLRequest("http://www.webfreephone.ru"));
-		}
-		
-		private function handleSettingsTextOver(event:MouseEvent):void
-		{
-			_settingsTextHolder.visible = false;
-			_settingsTextOverHolder.visible = true;
-			_settingsTextClickedHolder.visible = false;
-		}
-		
-		private function handleSettingsTextOut(event:MouseEvent):void
-		{
-			_settingsTextHolder.visible = true;
-			_settingsTextOverHolder.visible = false;
-			_settingsTextClickedHolder.visible = false;
-		}
-		
-		private function handleSettingsTextDown(event:MouseEvent):void
-		{
-			_settingsTextHolder.visible = false;
-			_settingsTextOverHolder.visible = false;
-			_settingsTextClickedHolder.visible = true;
-		}
-		
-		private function handleSettingsTextUp(event:MouseEvent):void
-		{
-			_settingsTextHolder.visible = false;
-			_settingsTextOverHolder.visible = true;
-			_settingsTextClickedHolder.visible = false;
 		}
 		
 		private function convert(tm:Number):String

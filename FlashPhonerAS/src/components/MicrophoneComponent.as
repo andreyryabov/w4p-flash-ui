@@ -262,31 +262,38 @@ package components
 		
 		public function goToSettingsState():void
 		{
-			TweenMax.to(_indicatorBackground, 0.5, {y:-14, ease:Expo.easeOut});
+//			TweenMax.to(_indicatorBackground, 0.5, {y:-14, ease:Expo.easeOut});
 			
-			_sliderHolder.alpha = 0;
-			_microphoneChoose.alpha = 0;
+			_indicatorBackground.y = -14;
+			
+//			_sliderHolder.alpha = 0;
+//			_microphoneChoose.alpha = 0;
 			
 			_sliderHolder.visible = true;
 			_microphoneChoose.visible = true;
 			
-			TweenMax.to(_sliderHolder, 1, {alpha:1, ease:Expo.easeOut});
-			TweenMax.to(_microphoneChoose, 1, {alpha:1, ease:Expo.easeOut});
+//			TweenMax.to(_sliderHolder, 1, {alpha:1, ease:Expo.easeOut});
+//			TweenMax.to(_microphoneChoose, 1, {alpha:1, ease:Expo.easeOut});
 		}
 		
 		public function goToNormalState():void
 		{
-			TweenMax.to(_indicatorBackground, 0.5, {y:9, ease:Expo.easeOut});
+//			TweenMax.to(_indicatorBackground, 0.5, {y:9, ease:Expo.easeOut});
 			
-			TweenMax.to(_sliderHolder, 1, {alpha:0, ease:Expo.easeOut, onComplete:hideSlider});
-			TweenMax.to(_microphoneChoose, 1, {alpha:0, ease:Expo.easeOut});
-		}
-		
-		private function hideSlider():void
-		{
+			_indicatorBackground.y = 9;
+			
 			_sliderHolder.visible = false;
 			_microphoneChoose.visible = false;
+			
+//			TweenMax.to(_sliderHolder, 1, {alpha:0, ease:Expo.easeOut, onComplete:hideSlider});
+//			TweenMax.to(_microphoneChoose, 1, {alpha:0, ease:Expo.easeOut});
 		}
+		
+//		private function hideSlider():void
+//		{
+//			_sliderHolder.visible = false;
+//			_microphoneChoose.visible = false;
+//		}
 		
 		private function handleIconClick(event:MouseEvent):void
 		{
