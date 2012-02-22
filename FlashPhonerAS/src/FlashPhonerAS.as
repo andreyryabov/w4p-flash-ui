@@ -159,7 +159,6 @@ package
 			}
 			
 			
-			
 			if(this.root.loaderInfo.parameters.servers)
 			{
 				servers = String(this.root.loaderInfo.parameters.servers).split(",");
@@ -570,6 +569,14 @@ package
 			}
 			
 			
+			
+			setMicrophone(getMicrophone(_microphoneIndex));
+			
+			if(microphone)
+			{
+				microphone.gain = _microphoneGain;
+			}
+			
 			micActivityTimer = Utils.interval(function():void
 			{
 				if (microphone)
@@ -578,9 +585,6 @@ package
 					_microphoneComponent.setIndicator(val);					
 				}
 			}, 50);
-			
-			
-			setMicrophone(getMicrophone(_microphoneIndex));
 			
 			
 			_chooseMicrophoneText = new ChooseMicrophoneText();
@@ -653,7 +657,14 @@ package
 			{    
 				if(_settingsFlag)
 				{
-					_logoHolder.y = 9;
+					if(isIVR)
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:150, ease:Expo.easeOut});
+					}
+					else
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:5, ease:Expo.easeOut});
+					}
 					
 					_semiTransparentBackground.visible = false;
 				}
@@ -845,7 +856,29 @@ package
 				_backgroundHolder.visible = false;
 				_settingsBackgroundHolder.visible = true;
 				
-				TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
+				if(phone == null)
+				{
+					if(isIVR)
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:150, ease:Expo.easeOut, onComplete:showControls1});
+					}
+					else
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:5, ease:Expo.easeOut, onComplete:showControls1});
+					}
+				}
+				else
+				{
+					if(isIVR)
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
+					}
+					else
+					{
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
+					}
+				}
+				
 				_text.visible = false;
 				
 				_soundSlider.visible = false;
@@ -1118,6 +1151,13 @@ package
 			{
 				phone.getMicrophone().gain = _microphoneGain;
 			}
+			else
+			{
+				if(microphone)
+				{
+					microphone.gain = _microphoneGain;
+				}
+			}
 			
 			settings.data.microphoneGain = _microphoneGain;
 			settings.data.isMicrophoneDisabled = event._isInitiatorButton;
@@ -1145,7 +1185,14 @@ package
 		{
 			if(_settingsFlag)
 			{
-				_logoHolder.y = 9;
+				if(isIVR)
+				{
+					TweenMax.to(_logoHolder, 0.7, {y:150, ease:Expo.easeOut});
+				}
+				else
+				{
+					TweenMax.to(_logoHolder, 0.7, {y:5, ease:Expo.easeOut});
+				}
 				
 				_semiTransparentBackground.visible = false;
 			}
