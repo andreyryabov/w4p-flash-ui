@@ -29,6 +29,7 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
+	import flash.utils.setTimeout;
 	
 	import ru.w4p.*;
 	import ru.w4p.net.*;
@@ -734,7 +735,9 @@ package
 			
 			if(isIVR)
 			{
-				TweenMax.to(_logoHolder, 1, {y:9, ease:Expo.easeOut, onComplete:showButtons});
+				TweenMax.to(_logoHolder, 1, {y:9, ease:Expo.easeOut});
+				
+				setTimeout(showButtons, 1000);
 			}
 		}
 		
@@ -745,6 +748,8 @@ package
 				NumberButton(_buttonsArray[j]).visible = true;
 				
 				NumberButton(_buttonsArray[j]).alpha = 0;
+				
+				TweenMax.killTweensOf(NumberButton(_buttonsArray[j]));
 				
 				TweenMax.to(NumberButton(_buttonsArray[j]), 1, {alpha:1, ease:Expo.easeOut});
 			}
@@ -860,41 +865,40 @@ package
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:150, ease:Expo.easeOut, onComplete:showControls1});
+						TweenMax.to(_logoHolder, 0.7, {y:150, ease:Expo.easeOut});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:5, ease:Expo.easeOut, onComplete:showControls1});
+						TweenMax.to(_logoHolder, 0.7, {y:5, ease:Expo.easeOut});
 					}
 				}
 				else
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls1});
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut});
 					}
 				}
 				
 				_text.visible = false;
 				
 				_soundSlider.visible = false;
+				_microphoneComponent.visible = false;
 				
 				if(isIVR)
 				{
 					TweenMax.to(_soundSlider, 0.7, {y:375, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.7, {y:200, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:200, ease:Expo.easeOut, onComplete:showControls1});
 				}
 				else
 				{
 					TweenMax.to(_soundSlider, 0.7, {y:230, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.7, {y:55, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:55, ease:Expo.easeOut, onComplete:showControls1});
 				}
-				
-				_microphoneComponent.visible = false;
 			}
 			else
 			{
@@ -909,42 +913,43 @@ package
 				_settingsBackgroundHolder.visible = false;
 				
 				_soundSlider.visible = false;
+				_microphoneComponent.visible = false;
 				
 				if(isIVR)
 				{
 					TweenMax.to(_soundSlider, 0.7, {y:400, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.7, {y:265, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:265, ease:Expo.easeOut, onComplete:showControls2});
 				}
 				else
 				{
 					TweenMax.to(_soundSlider, 0.7, {y:255, ease:Expo.easeOut});
-					TweenMax.to(_callButton, 0.7, {y:120, ease:Expo.easeOut});
+					TweenMax.to(_callButton, 0.7, {y:120, ease:Expo.easeOut, onComplete:showControls2});
 				}
+				
+				TweenMax.killTweensOf(_logoHolder);
 				
 				if(phone == null)
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:215, ease:Expo.easeOut, onComplete:showControls2});
+						TweenMax.to(_logoHolder, 0.7, {y:215, ease:Expo.easeOut});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut, onComplete:showControls2});
+						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut});
 					}
 				}
 				else
 				{
 					if(isIVR)
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut, onComplete:showControls2});
+						TweenMax.to(_logoHolder, 0.7, {y:9, ease:Expo.easeOut});
 					}
 					else
 					{
-						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut, onComplete:showControls2});
+						TweenMax.to(_logoHolder, 0.7, {y:70, ease:Expo.easeOut});
 					}
 				}
-				
-				_microphoneComponent.visible = false;
 			}
 		}
 		
@@ -954,11 +959,15 @@ package
 			
 			_soundSlider.visible = true;
 			_soundSlider.alpha = 0;
+			
+			TweenMax.killTweensOf(_soundSlider);
 			TweenMax.to(_soundSlider, 1, {alpha:1, ease:Expo.easeOut});
 			
 			_microphoneComponent.visible = true;
 			_microphoneComponent.alpha = 0;
 			_microphoneComponent.goToSettingsState();
+			
+			TweenMax.killTweensOf(_microphoneComponent);
 			TweenMax.to(_microphoneComponent, 1, {alpha:1, ease:Expo.easeOut});
 		}
 		
@@ -968,11 +977,13 @@ package
 			
 			_soundSlider.visible = true;
 			_soundSlider.alpha = 0;
+			TweenMax.killTweensOf(_soundSlider);
 			TweenMax.to(_soundSlider, 1, {alpha:1, ease:Expo.easeOut});
 			
 			_microphoneComponent.visible = true;
 			_microphoneComponent.alpha = 0;
 			_microphoneComponent.goToNormalState();
+			TweenMax.killTweensOf(_microphoneComponent);
 			TweenMax.to(_microphoneComponent, 1, {alpha:1, ease:Expo.easeOut});
 		}
 		
