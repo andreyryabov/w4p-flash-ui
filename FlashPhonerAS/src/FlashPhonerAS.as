@@ -548,8 +548,15 @@ package
 				_soundSlider.setDisableState();
 			}
 			
+			if(Microphone.names.length != 0)
+			{
+				_microphoneComponent = new MicrophoneComponent(Microphone.names, _microphoneIndex);
+			}
+			else
+			{
+				_microphoneComponent = new MicrophoneComponent([], _microphoneIndex);
+			}
 			
-			_microphoneComponent = new MicrophoneComponent(Microphone.names, _microphoneIndex);
 			_microphoneComponent.x = 19;
 			
 			if(isIVR)
