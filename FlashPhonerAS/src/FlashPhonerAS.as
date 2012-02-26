@@ -648,14 +648,14 @@ package
 		{
 			var mic:Microphone = null;
 			
-			if ("getEnhancedMicrophone" in Microphone) 
-			{
-				mic = Microphone["getEnhancedMicrophone"](index);                    
-			}
-			else 
-			{
+//			if ("getEnhancedMicrophone" in Microphone) 
+//			{
+//				mic = Microphone["getEnhancedMicrophone"](index);                    
+//			}
+//			else 
+//			{
 				mic = Microphone.getMicrophone(index);
-			}
+//			}
 			
 			if(mic.muted == true)
 			{
