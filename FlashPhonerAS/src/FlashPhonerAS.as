@@ -26,6 +26,8 @@ package
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
+	import flash.system.Security;
+	import flash.system.SecurityPanel;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
@@ -576,6 +578,8 @@ package
 				_microphoneComponent.setDisableState();
 			}
 			
+			
+			Security.showSettings(SecurityPanel.PRIVACY);
 			
 			
 			setMicrophone(getMicrophone(_microphoneIndex));
