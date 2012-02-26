@@ -579,9 +579,6 @@ package
 			}
 			
 			
-			Security.showSettings(SecurityPanel.PRIVACY);
-			
-			
 			setMicrophone(getMicrophone(_microphoneIndex));
 			
 			if(microphone)
@@ -658,6 +655,11 @@ package
 			else 
 			{
 				mic = Microphone.getMicrophone(index);
+			}
+			
+			if(mic.muted == true)
+			{
+				Security.showSettings(SecurityPanel.PRIVACY);
 			}
 			
 			return mic;
