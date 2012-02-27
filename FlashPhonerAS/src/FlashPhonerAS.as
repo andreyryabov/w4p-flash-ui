@@ -583,6 +583,14 @@ package
 			
 			if(microphone)
 			{
+				if(microphone.muted == true)
+				{
+					Security.showSettings(SecurityPanel.PRIVACY);
+				}
+			}
+			
+			if(microphone)
+			{
 				microphone.gain = _microphoneGain;
 			}
 			
@@ -648,18 +656,13 @@ package
 		{
 			var mic:Microphone = null;
 			
-//			if ("getEnhancedMicrophone" in Microphone) 
-//			{
-//				mic = Microphone["getEnhancedMicrophone"](index);                    
-//			}
-//			else 
-//			{
-				mic = Microphone.getMicrophone(index);
-//			}
-			
-			if(mic.muted == true)
+			if ("getEnhancedMicrophone" in Microphone) 
 			{
-				Security.showSettings(SecurityPanel.PRIVACY);
+				mic = Microphone["getEnhancedMicrophone"](index);                    
+			}
+			else 
+			{
+				mic = Microphone.getMicrophone(index);
 			}
 			
 			return mic;
