@@ -585,7 +585,7 @@ package
 			{
 				if(microphone.muted == true)
 				{
-					Security.showSettings(SecurityPanel.PRIVACY);
+//					Security.showSettings(SecurityPanel.PRIVACY);
 				}
 			}
 			
